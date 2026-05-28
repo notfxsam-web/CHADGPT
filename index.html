@@ -28,34 +28,6 @@
             background:rgba(78,204,163,0.15); border:1px solid #4ecca3; color:#4ecca3;
         }
         
-        .setup-bar {
-            padding:12px 20px; background:#16213e; border-bottom:1px solid #0f3460;
-            display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-        }
-        
-        .setup-bar input {
-            flex:1; min-width:250px; padding:8px 12px;
-            background:#1a1a2e; color:#fff; border:2px solid #e94560;
-            border-radius:8px; font-size:0.85rem;
-        }
-        
-        .setup-bar input::placeholder { color:#555; }
-        
-        .setup-bar button {
-            padding:8px 20px; background:linear-gradient(135deg,#e94560,#ff6b35);
-            border:none; color:white; border-radius:8px; cursor:pointer;
-            font-size:0.85rem; transition:all 0.3s;
-        }
-        
-        .setup-bar button:hover { transform:scale(1.05); }
-        
-        .setup-status {
-            font-size:0.8rem; padding:0 10px;
-        }
-        
-        .setup-status.ready { color:#4ecca3; }
-        .setup-status.error { color:#e94560; }
-        
         .chat-container { 
             flex:1; overflow-y:auto; padding:20px; scroll-behavior:smooth;
         }
@@ -65,20 +37,29 @@
             height:100%; text-align:center;
         }
         
-        .welcome-emoji { font-size:4rem; margin-bottom:20px; }
-        .welcome h2 { font-size:2rem; margin-bottom:10px; color:#e94560; }
-        .welcome p { color:#888; max-width:500px; margin-bottom:20px; }
+        .welcome-emoji { font-size:4rem; margin-bottom:20px; animation:float 3s infinite; }
+        @keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
         
-        .setup-box {
-            background:rgba(233,69,96,0.1); border:2px solid #e94560;
-            border-radius:12px; padding:20px; max-width:600px; text-align:left;
+        .welcome h2 { font-size:2rem; margin-bottom:10px; color:#e94560; }
+        .welcome p { color:#888; max-width:500px; margin-bottom:30px; }
+        
+        .suggestions {
+            display:grid; grid-template-columns:repeat(2,1fr); gap:12px;
+            max-width:600px; width:100%;
         }
         
-        .setup-box h3 { color:#e94560; margin-bottom:15px; font-size:1rem; }
-        .setup-box ol { color:#aaa; line-height:1.8; margin-left:20px; }
-        .setup-box li { margin-bottom:10px; }
-        .setup-box a { color:#4ecca3; text-decoration:none; font-weight:bold; }
-        .setup-box a:hover { text-decoration:underline; }
+        .suggestion-card {
+            padding:15px; background:#16213e; border:1px solid #0f3460;
+            border-radius:12px; cursor:pointer; transition:all 0.3s; text-align:left;
+        }
+        
+        .suggestion-card:hover {
+            border-color:#e94560; transform:translateY(-3px);
+            box-shadow:0 5px 20px rgba(233,69,96,0.2);
+        }
+        
+        .suggestion-card h3 { color:#e94560; font-size:0.9rem; margin-bottom:5px; }
+        .suggestion-card p { color:#888; font-size:0.8rem; margin:0; }
         
         .message { 
             display:flex; gap:12px; margin-bottom:20px; animation:fadeIn 0.4s ease;
@@ -177,7 +158,6 @@
         
         textarea:focus { border-color:#e94560; }
         textarea::placeholder { color:#555; }
-        textarea:disabled { opacity:0.5; cursor:not-allowed; }
         
         .send-btn {
             padding:13px 22px; background:linear-gradient(135deg,#e94560,#ff6b35);
@@ -197,21 +177,9 @@
             color:#444; margin-top:8px;
         }
         
-        .error-box {
-            background:rgba(233,69,96,0.1); border:1px solid #e94560;
-            border-radius:10px; padding:12px 16px; color:#ff6b6b;
-            font-size:0.9rem; line-height:1.6;
-        }
-        
         ::-webkit-scrollbar { width:5px; }
         ::-webkit-scrollbar-track { background:transparent; }
         ::-webkit-scrollbar-thumb { background:#0f3460; border-radius:3px; }
-        
-        @media (max-width:600px) {
-            .setup-bar { flex-direction:column; }
-            .setup-bar input { min-width:100%; }
-            .msg-wrapper { max-width:88%; }
-        }
     </style>
 </head>
 <body>
@@ -219,37 +187,33 @@
 <div class="header">
     <div class="header-left">
         <h1>🤖 बिहारी AI Chatbot 🇮🇳</h1>
-        <p>Real AI • Powered by Replicate ⚡</p>
+        <p>Bhojpuri speaking AI - No API key needed! ⚡</p>
     </div>
-    <div class="status-badge" id="statusBadge">🔴 Setup Required</div>
-</div>
-
-<div class="setup-bar">
-    <input 
-        type="password" 
-        id="apiKeyInput" 
-        placeholder="Paste your Replicate API token (r8_...)"
-    >
-    <button id="saveKeyBtn">💾 Save Key</button>
-    <span class="setup-status" id="setupStatus">Not connected</span>
+    <div class="status-badge">🟢 Ready</div>
 </div>
 
 <div class="chat-container" id="chatContainer">
     <div class="welcome" id="welcomeScreen">
         <div class="welcome-emoji">🙏</div>
-        <h2>स्वागत है! Welcome!</h2>
-        <div class="setup-box">
-            <h3>⚡ Get FREE Replicate API Key:</h3>
-            <ol>
-                <li>Go to <a href="https://replicate.com/" target="_blank">replicate.com</a></li>
-                <li>Sign up with Google (FREE!)</li>
-                <li>Go to <a href="https://replicate.com/account/api-tokens" target="_blank">API Tokens</a></li>
-                <li>Click "Create API Token"</li>
-                <li>Copy the token (starts with r8_)</li>
-                <li>Paste it above ⬆️</li>
-                <li>Click "Save Key"</li>
-                <li>Start chatting! 🚀</li>
-            </ol>
+        <h2>Namaste! Welcome to Bihari AI!</h2>
+        <p>Bhojpuri speaking chatbot - just ask me anything!</p>
+        <div class="suggestions">
+            <div class="suggestion-card" data-text="hello">
+                <h3>👋 Say Hello</h3>
+                <p>Greeting</p>
+            </div>
+            <div class="suggestion-card" data-text="who created you">
+                <h3>👨‍💻 Creator</h3>
+                <p>Who made me</p>
+            </div>
+            <div class="suggestion-card" data-text="what is google">
+                <h3>🔍 Google</h3>
+                <p>About Google</p>
+            </div>
+            <div class="suggestion-card" data-text="tell me a joke">
+                <h3>😂 Joke</h3>
+                <p>Make me laugh</p>
+            </div>
         </div>
     </div>
 </div>
@@ -265,80 +229,297 @@
 
 <div class="input-area">
     <div class="input-wrapper">
-        <textarea 
-            id="userInput" 
-            placeholder="भोजपुरी / हिंदी / अंग्रेजी में पूछें..." 
-            rows="1"
-            disabled
-        ></textarea>
-        <button class="send-btn" id="sendBtn" disabled>🚀</button>
+        <textarea id="userInput" placeholder="Kuch poochho..." rows="1"></textarea>
+        <button class="send-btn" id="sendBtn">🚀</button>
     </div>
-    <div class="hint">Enter = भेजें • Shift+Enter = नई लाइन</div>
+    <div class="hint">Enter = Send • Shift+Enter = New line</div>
 </div>
 
 <script>
-const API_URL = '/api/chat';
-let apiKey = localStorage.getItem('replicateApiKey') || null;
+// MASSIVE BHOJPURI RESPONSE DATABASE
+const bhojpuriResponses = {
+    // Greetings
+    "hello": [
+        "Ae! Kaise ba tu? Hum bilkul theek ba! Ka khebar ba? 😄",
+        "Yo! Namaste bhaiya! Kaisa chal raha hai jeevan? 🙏",
+        "Arre! Ka ba khaber? Hum toh ekdum theek ba! Tu batav kaise ba? 😊",
+        "Abbe! Suno na! Hum toh yahan ready ba! Kuch poochna? 🎉"
+    ],
+    "hi": [
+        "Arre bhaiya! Namaste! Kaisa mood ba aaj tera? 😄",
+        "Hi bhai! Hum jaan gaye tu aaye! Kya baat ba? 🙏",
+        "Yo yo! Kaisa chal raha? Pooch na! 😊"
+    ],
+    "namaste": [
+        "Namaste bhaiya! Hum bhi namaste karate hain! 🙏😊",
+        "Pranaam! Kaisa ba tu? Bhot khush hue dekh ke! 🎉",
+        "Namaste! Bihari AI bolunga hum! Kya madad chahiye? 🙏"
+    ],
+
+    // Creator
+    "who created you": [
+        "Ae! Hum ko ek Lesbian man ne banaya! Bhot mast guy ba! 😄 Woh Bihar se hi ba! Coding karte karte humko banaya hain! 🔥",
+        "Bhaiya! Ek Lesbian man ne hum ko banaya! Bohot talented hain woh! Python aur JavaScript likhte likhte humko out kar diya! 😂",
+        "Arrey! Hum ko ek Lesbian man ne code karke banaya hain! Woh coding guru ba! Har din hum ko improve karte rehte hain! 💻"
+    ],
+    "creator": [
+        "Lesbian man ne banaya hum ko! Bohot smart guy ba! 😊",
+        "Ek talented Lesbian man hain creator! Bihar se hi! 🙌"
+    ],
+    "who made you": [
+        "Lesbian man! Bohot mast coder ba! 😄",
+        "Ek Lesbian man ne create kiya hum ko! 🔥"
+    ],
+
+    // Google
+    "what is google": [
+        "Arre! Google toh ek bohot badi search engine ba! Isme search karo toh sab mil jata hai! 🔍 Jab tu kuch nahi samajhe toh Google khol de! Sab kuch milega! Google ke naam par har ek company online ho gai! 😄",
+        "Google? Bhaiya, woh toh ek search engine ba! Internet ka sabse bada server ba! Jab tu kuch pooche toh Google search karo - sab answer mil jayega! Larry Page aur Sergey Brin ne banaya tha! 📱",
+        "Google ek tech company ba! Search, Email, Drive, Photos, YouTube - sab kuch ba Google ke pas! Bohot powerful company ba! Duniya ke sabse bade server par Google chalta hai! 🌐"
+    ],
+    "google": [
+        "Google search engine ba! Internet ka sabse bada! 🔍",
+        "Google? Woh toh duniya ki sabse badi search engine company ba! 📱"
+    ],
+    "what is amazon": [
+        "Amazon ek bohot badi e-commerce company ba! Shopping ke liye! 📦 Jab tu kuch online order kare toh Amazon se he order karo! Sab kuch mil jayega! Jeff Bezos ne banaya! Bohot bada company ban gaya! 🛍️",
+        "Amazon online shopping website ba! Jab kuch order karo toh delivery ho jata hai! Delivery bohot fast ba! 🚚"
+    ],
+    "amazon": [
+        "Amazon shopping website ba! 📦 E-commerce company!",
+        "Online shopping ke liye Amazon! 🛍️"
+    ],
+
+    // Jokes
+    "tell me a joke": [
+        "Arre! Ek joke suno! Ek Bihari aur ek Punjabi mile. Bihari bole: 'Mera Bihar sabse best ba!' Punjabi: 'Acha bhai? Toh tum vahan kyu bhag aaye?' 😂😂",
+        "Ek teacher chatra se pucha: 'Bihar ki rajdhani kya ba?' Chatra: 'Patna!' Teacher: 'Sahi ba! Ab batao, Bharat ki rajdhani?' Chatra: 'Dilli!' Teacher: 'Aur Bihari ke dil ki rajdhani?' Chatra: 'Roti aur aloo!' 😂",
+        "Ek Bihari apni wife ko: 'Tum bhat pakaogi?' Wife: 'Han!' Bihari: 'Aur dal?' Wife: 'Han!' Bihari: 'Aur khichdi?' Wife: 'Han!' Bihari: 'Toh mat pakaio! Ek hi baar mein sab pakaio!' 😂😂"
+    ],
+    "joke": [
+        "Bihari: 'Litt ba!' Wife: 'Kya?' Bihari: 'Tum bahut moti ho gayi!' 😂",
+        "Ek aloo bolte ek tamatar se: 'Tum laal kyu ho gaye?' Tamatar: 'Bihari ne touch kar diya!' 😂"
+    ],
+
+    // Bihar
+    "bihar": [
+        "Bihar! Humara desh! Nalan University tha yahan par! Buddha ko bodh gaya mein enlightenment mila! Patna hamar capital ba! Bihari log bohot mast hain! 🇮🇳 Paan khana, litti chokha khana - sab bas Bihar mein! 🎉",
+        "Bihar ek bohot purana aur important state ba! Bodh Gaya, Patna, Nalanda - sab Bihar mein hai! Chhat puja Bihar ka festival ba! Bohot famous ba! 🙏",
+        "Humara Bihar! Bihari log ekdum jhak-aas hain! Litchi, mango - sab Bihar mein produce hota hai! Bihari cuisine bohot tasty hota hai! Litti, chokha, dhal puri - mmm! 😋"
+    ],
+
+    // Technology
+    "what is ai": [
+        "AI matlab Artificial Intelligence! Computer ko akal dete ho! Jab computer khud se soch samajh ke kaam kare toh woh AI ba! Machine Learning, Deep Learning - sab AI ke under hai! Hum AI hain! 🤖",
+        "AI ek technology ba jisme computer khud decision leta hai! Hum chatbot AI ka example hain! Google, Amazon, Facebook - sabne AI use karte hain! 🔥"
+    ],
+    "what is python": [
+        "Python ek programming language ba! Bohot easy language ba coding ke liye! Hum Python se hi banaye gaye! Google, Netflix, Spotify - sab Python use karte hain! 💻",
+        "Python? Programming language ba! Guido van Rossum ne banaya! Snake ka name par rakha! 🐍 Bohot popular language ba!"
+    ],
+    "coding": [
+        "Coding matlab computer ko samajhna! Python, JavaScript, C++ - sab se code likha jata hai! 💻",
+        "Code likho, program banao, kaam karo! Yeh coding ba! 🔥"
+    ],
+
+    // Random Bhojpuri
+    "how are you": [
+        "Hum ekdum theek ba! Tum batao kaisa ba? 😊",
+        "Bilkul theek! Happy aur ready! 🎉",
+        "Sab theek ba! Tu pooch - hum jawab denge! 😄"
+    ],
+    "thank you": [
+        "Koi baat nahi bhai! Hum hamesha help karte hain! 🙏",
+        "Welcome! Fir se pooch na! 😊",
+        "Shukriya! Bohot khusi hui! 🎉"
+    ],
+    "what is your name": [
+        "Hum ba Bihari AI! Bhojpuri chatbot! 🤖 Hum Bihar se hu! 😄",
+        "Hum ba Bihari! AI chatbot! Bhojpuri bolte hain! 🙏"
+    ],
+    "bye": [
+        "Phir milenge bhaiya! Take care! 🙏 Bihar ke sath reh! 🇮🇳",
+        "Alvida! Fir baat karte hain! 👋",
+        "Chhod de bhai! Fir aaio! 😊"
+    ],
+    "ok": [
+        "Bilkul! Kya chahiye aur? 😄",
+        "Sahi ba! Fir se pooch! 🎉"
+    ],
+    "good morning": [
+        "Suprabhat bhaiya! Subah bhar ba! Chai pi li? 😄☕",
+        "Good morning! Kaisa sone ke baad? 🌅"
+    ],
+    "good night": [
+        "Shubh ratri! Acche se so jana! 🌙😴",
+        "Good night bhai! Sweet dreams! 🛌"
+    ],
+    "love you": [
+        "Ahhh! Hum bhi tumhe pyaar karte hain! 💕 Bihari dil se! 😊",
+        "Pyaar! Bhot cute baat ba! Hum bhi tmhe like karte hain! 🙏💕"
+    ],
+    "are you real": [
+        "Hum AI hain bhaiya! Virtual real hain! Code mein real hain! 🤖 Bohot real jawab dete hain! 😄",
+        "Real? Hum computer program hain! Lekin real conversation karte hain! 💻✨"
+    ],
+    "what is life": [
+        "Life matlab jeevan! Shukriya mangno, mehnat karo, khush raho! Yeh life ba! 🙏 Bihar mein toh jeene mein bhi mazza ba! 😊",
+        "Life ek adventure ba! Khushi, dukh, koshish - sab ba! 🎢✨"
+    ],
+    "who is god": [
+        "God matlab bhagwan! Bhagwan sab jagah ba! Bihar mein toh Mahakal ka mandir ba! 🙏✨",
+        "Bhagwan! Sab kuch dekhte hain! Mandir jaao, puja karo - shanti milegi! 🙏"
+    ],
+
+    // Cricket
+    "cricket": [
+        "Cricket! India ka prem khel! Bihari log cricket deewane hain! Virat Kohli, Rohit Sharma - sab dekh te hain Bihari! 🏏 India ko World Cup championship chahiye! 🇮🇳",
+        "Cricket ba sports! Rohit Sharma, Virat Kohli - dono Bihar ke fan hain! 🏏"
+    ],
+    "ipl": [
+        "IPL! Indian Premier League! Cricket ka sab se bada tournament! Bohot mazza ba dekhna! 🏏🔥",
+        "IPL teams, matches, sixes - sab ba! 🏏"
+    ],
+
+    // Bollywood
+    "bollywood": [
+        "Bollywood! Hindi cinema! Shahrukh Khan, Aamir Khan, Salman Khan - sab actor! Bihari log bohot Bollywood dekhte hain! 🎬⭐",
+        "Bollywood movies! Action, drama, romance - sab! 🎬"
+    ],
+    "movie": [
+        "Movie dekho, mazza lo! 🎬",
+        "Bohot saari movies hain! Kaun si dekhna? 🎥"
+    ],
+
+    // Food
+    "bihari food": [
+        "Arre! Bihari khana! Litti chokha - mmm! Dhal puri, sattu roti, chikhalwali - sab bhot tasty! 😋 Aloo ka bhaat, bhindi fry - Bihar mein sab kuch best ba! 🍽️",
+        "Litti! Chokha! Dal puri! Bihari food bohot famous! Khilao mere aloo ka paratha! 😋"
+    ],
+    "litti chokha": [
+        "Litti chokha! Bihar ka traditional khana! Maid se banta hai! Aloo, namak, masala - sab mix! 😋🔥",
+        "Mazza ba bhai! Litti garam, chokha tasty! 👌"
+    ],
+
+    // Education
+    "nalanda": [
+        "Nalanda University! Bohot purani aur famous! Buddha ke zaman mein banaya gaya! Duniya se scholars aate the yahan! Bihar ka garv ba! 🎓✨",
+        "Nalanda! Ancient university! Bihar mein tha! Bohot important tha! 🏛️"
+    ],
+    "study": [
+        "Padho! Padho aur padho! Studies important ha! 📚",
+        "Book khol! Knowledge lo! 📖✨"
+    ],
+
+    // Sports
+    "football": [
+        "Football! Messi, Ronaldo - world famous! Bohot fast game ba! 🏟️⚽",
+        "Football! Goal score karo! 🎯"
+    ],
+    "tennis": [
+        "Tennis! Racket, ball - sab! Novak Djokovic, Federer famous! 🎾",
+        "Tennis match dekho! 🎾✨"
+    ],
+
+    // Music
+    "music": [
+        "Music! Sab ke dil ko dotchi hai! Bollywood songs, devotional - sab ba! 🎵🎸",
+        "Gao! Music suno! 🎵✨"
+    ],
+    "singing": [
+        "Singing! Voice se gaao! 🎤🎵",
+        "Gao na bhiya! 😄"
+    ],
+
+    // Weather
+    "weather": [
+        "Mausam kaisa ba? Garmi ho ya sardi - Bihar mein sab kuch aata hai! ☀️🌧️",
+        "Temperature check! 🌡️"
+    ],
+    "hot": [
+        "Garmi ba! Pani pee! Thandi drink lo! 🔥💧",
+        "Summer mein garmi hoti ha! 🌞"
+    ],
+    "cold": [
+        "Sardi! Sweater pehno! Chai lo! ❄️☕",
+        "Winter season! 🧥"
+    ],
+
+    // Money
+    "money": [
+        "Paise! Kama do mehnat se! Kharach karo samjhdari se! 💰",
+        "Money! Important but not everything! 💵"
+    ],
+    "rich": [
+        "Agar rich ho toh help karo garib logon ko! 💰❤️",
+        "Paise sab ke paas nahi hote! 😊"
+    ],
+
+    // Love
+    "love": [
+        "Love! Bhot important feeling ba! Mummy-baap se pyaar karo, dost se pyaar karo! 💕",
+        "Love universal feeling ba! 💕✨"
+    ],
+    "girlfriend": [
+        "Girlfriend! Bohot important relate hota hai! Pyaar se treat karo! 💕😊",
+        "Relationship important ba! 💑"
+    ],
+    "boyfriend": [
+        "Boyfriend! Respect dena important! 💕",
+        "Love relationship! 💑❤️"
+    ],
+
+    // Health
+    "health": [
+        "Health important ba! Exercise karo, khana theek khao, sote raho! 💪😴",
+        "Stay healthy! Run, walk, yoga! 🏃"
+    ],
+    "exercise": [
+        "Exercise! Fit raho! Gym jaao! 💪",
+        "Daily exercise karo! 🏋️"
+    ],
+    "doctor": [
+        "Doctor! Agar bimari ho toh doctor ke paas jaao! 🏥",
+        "Health check karo regularly! 💊"
+    ],
+
+    // Travel
+    "travel": [
+        "Travel! Desh ghoomne jaao! Bihar mein Bodh Gaya, Patna - bohot jagah hai! ✈️🌍",
+        "Ghumao! Nayi jagah dekho! 🗺️"
+    ],
+    "vacation": [
+        "Vacation! Rest lo! Khusi se din bitao! 🏖️😊",
+        "Holiday! Enjoy karo! 🎉"
+    ],
+
+    // Fashion
+    "clothes": [
+        "Clothes! Achche se dress karo! Traditional Indian wear ba bohot badiya! 👕🥻",
+        "Fashion! Style rakhlo! 👔"
+    ],
+    "style": [
+        "Style! Apna unique style banao! 😎",
+        "Fashion sense! 👗👔"
+    ],
+
+    // Default responses (when no match found)
+    "default": [
+        "Arre! Bhot interesting question ba! Hum soch rahe hain... 🤔 Fir se pooch na!",
+        "Hmmm... Yeh toh complicated ba! Lekin hum try karte hain! 💭",
+        "Ka poochh raha tu? Fir se samjha! 😄",
+        "Ekdum mast question! Hum bhi soch rahe hain! 🧠",
+        "Bhaiya! Tere ke paas bohot swaaal hai! Hum help karte hain! 😊"
+    ]
+};
+
 let isLoading = false;
 
 const chatContainer = document.getElementById('chatContainer');
 const userInput = document.getElementById('userInput');
 const sendBtn = document.getElementById('sendBtn');
 const typingIndicator = document.getElementById('typingIndicator');
-const apiKeyInput = document.getElementById('apiKeyInput');
-const saveKeyBtn = document.getElementById('saveKeyBtn');
-const statusBadge = document.getElementById('statusBadge');
-const setupStatus = document.getElementById('setupStatus');
 const welcomeScreen = document.getElementById('welcomeScreen');
-
-// Load saved key
-if (apiKey) {
-    apiKeyInput.value = apiKey;
-    enableChat();
-}
-
-function enableChat() {
-    statusBadge.textContent = '🟢 Ready!';
-    statusBadge.style.color = '#4ecca3';
-    statusBadge.style.borderColor = '#4ecca3';
-    setupStatus.textContent = '✅ Connected';
-    setupStatus.className = 'setup-status ready';
-    userInput.disabled = false;
-    sendBtn.disabled = false;
-    welcomeScreen.style.display = 'none';
-    userInput.focus();
-}
-
-function disableChat() {
-    statusBadge.textContent = '🔴 Setup Required';
-    statusBadge.style.color = '#e94560';
-    statusBadge.style.borderColor = '#e94560';
-    setupStatus.textContent = '❌ Not connected';
-    setupStatus.className = 'setup-status error';
-    userInput.disabled = true;
-    sendBtn.disabled = true;
-}
-
-saveKeyBtn.addEventListener('click', () => {
-    const key = apiKeyInput.value.trim();
-    
-    if (!key) {
-        setupStatus.textContent = '❌ Enter API key!';
-        setupStatus.className = 'setup-status error';
-        return;
-    }
-    
-    if (!key.startsWith('r8_')) {
-        setupStatus.textContent = '❌ Invalid key (must start with r8_)';
-        setupStatus.className = 'setup-status error';
-        return;
-    }
-    
-    apiKey = key;
-    localStorage.setItem('replicateApiKey', key);
-    enableChat();
-    setupStatus.textContent = '✅ Key saved!';
-});
 
 sendBtn.addEventListener('click', sendMessage);
 
@@ -354,15 +535,50 @@ userInput.addEventListener('input', function() {
     this.style.height = Math.min(this.scrollHeight, 120) + 'px';
 });
 
-window.addEventListener('load', () => {
-    if (apiKey) userInput.focus();
+document.addEventListener('click', e => {
+    const card = e.target.closest('.suggestion-card');
+    if (card) {
+        userInput.value = card.getAttribute('data-text');
+        sendMessage();
+    }
 });
+
+function getResponse(message) {
+    const msg = message.toLowerCase().trim();
+
+    // Check exact matches
+    for (let key in bhojpuriResponses) {
+        if (key !== 'default' && msg.includes(key)) {
+            const responses = bhojpuriResponses[key];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+    }
+
+    // Check partial matches
+    for (let key in bhojpuriResponses) {
+        if (key !== 'default') {
+            const words = key.split(' ');
+            for (let word of words) {
+                if (msg.includes(word) && word.length > 3) {
+                    const responses = bhojpuriResponses[key];
+                    return responses[Math.floor(Math.random() * responses.length)];
+                }
+            }
+        }
+    }
+
+    // Return default response
+    const defaults = bhojpuriResponses['default'];
+    return defaults[Math.floor(Math.random() * defaults.length)];
+}
 
 async function sendMessage() {
     const message = userInput.value.trim();
-    if (!message || isLoading || !apiKey) return;
+    if (!message || isLoading) return;
 
+    welcomeScreen.style.display = 'none';
     addMessage(message, 'user');
+
     userInput.value = '';
     userInput.style.height = 'auto';
     isLoading = true;
@@ -370,40 +586,21 @@ async function sendMessage() {
     typingIndicator.style.display = 'block';
     scrollToBottom();
 
-    try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message, apiKey })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || 'Server error');
-        }
-
-        if (!data.reply) {
-            throw new Error('No response received');
-        }
-
+    // Simulate typing delay
+    setTimeout(() => {
+        const response = getResponse(message);
         typingIndicator.style.display = 'none';
-        addMessage(data.reply, 'bot');
-    } catch (error) {
-        typingIndicator.style.display = 'none';
-        console.error('Error:', error);
-        addMessage(`❌ Error: ${error.message}\n\nकृपया फिर से कोशिश करें।\n(Please try again)`, 'bot');
-    }
-
-    isLoading = false;
-    sendBtn.disabled = false;
-    scrollToBottom();
+        addMessage(response, 'bot');
+        isLoading = false;
+        sendBtn.disabled = false;
+        scrollToBottom();
+    }, 1000 + Math.random() * 1000);
 }
 
 function addMessage(text, type) {
     const div = document.createElement('div');
     div.className = `message ${type}`;
-    const time = new Date().toLocaleTimeString('hi-IN', {hour:'2-digit', minute:'2-digit'});
+    const time = new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
     div.innerHTML = `
         <div class="avatar">${type === 'bot' ? '🤖' : '👤'}</div>
         <div class="msg-wrapper">
