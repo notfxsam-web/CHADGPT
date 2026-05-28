@@ -377,18 +377,22 @@ async function sendMessage() {
             body: JSON.stringify({ message, apiKey })
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error || 'Server error');
+            throw new Error(data.error || 'Server error');
         }
 
-        const data = await response.json();
+        if (!data.reply) {
+            throw new Error('No response received');
+        }
+
         typingIndicator.style.display = 'none';
         addMessage(data.reply, 'bot');
     } catch (error) {
         typingIndicator.style.display = 'none';
-        addMessage(`❌ Error: ${error.message}\n\nकृपया फिर से कोशिश करें।\n(Please try again)`, 'bot');
         console.error('Error:', error);
+        addMessage(`❌ Error: ${error.message}\n\nकृपया फिर से कोशिश करें।\n(Please try again)`, 'bot');
     }
 
     isLoading = false;
