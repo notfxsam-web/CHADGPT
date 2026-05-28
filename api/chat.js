@@ -23,7 +23,7 @@ export default async function handler(req, res) {
 
   if (!key) {
     return res.status(500).json({ 
-      error: 'r8_FE1YJioCW9Hj9QoF490QrQMjWEntCi92LoSLE' 
+      error: 'r8_02aIyN4jtnejxyx7NGe2j61vWA7yRuf3ubVN0' 
     });
   }
 
