@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>बिहारी AI 🇮🇳</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+        body { background:#1a1a2e; color:#fff; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+        
+        .header {
+            padding:15px 25px; background:#16213e;
+            display:flex; align-items:center; justify-content:space-between;
+            border-bottom:2px solid #e94560;
+        }
+        
+        .header-left h1 {
+            font-size:1.3rem;
+            background: linear-gradient(135deg,#e94560,#ff6b35,#ffcc02);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header-left p { font-size:0.78rem; color:#888; margin-top:2px; }
+        
+        .status-badge {
+            padding:6px 15px; border-radius:20px; font-size:0.8rem;
+            background:rgba(78,204,163,0.15); border:1px solid #4ecca3; color:#4ecca3;
+        }
+        
+        .setup-bar {
+            padding:12px 20px; background:#16213e; border-bottom:1px solid #0f3460;
+            display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+        }
+        
+        .setup-bar input {
+            flex:1; min-width:250px; padding:8px 12px;
+            background:#1a1a2e; color:#fff; border:2px solid #e94560;
+            border-radius:8px; font-size:0.85rem;
+        }
+        
+        .setup-bar input::placeholder { color:#555; }
+        
+        .setup-bar button {
+            padding:8px 20px; background:linear-gradient(135deg,#e94560,#ff6b35);
+            border:none; color:white; border-radius:8px; cursor:pointer;
+            font-size:0.85rem; transition:all 0.3s;
+        }
+        
+        .setup-bar button:hover { transform:scale(1.05); }
+        
+        .setup-status {
+            font-size:0.8rem; padding:0 10px;
+        }
+        
+        .setup-status.ready { color:#4ecca3; }
+        .setup-status.error { color:#e94560; }
+        
+        .chat-container { 
+            flex:1; overflow-y:auto; padding:20px; scroll-behavior:smooth;
+        }
+        
+        .welcome {
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            height:100%; text-align:center;
+        }
+        
+        .welcome-emoji { font-size:4rem; margin-bottom:20px; }
+        .welcome h2 { font-size:2rem; margin-bottom:10px; color:#e94560; }
+        .welcome p { color:#888; max-width:500px; margin-bottom:20px; }
+        
+        .setup-box {
+            background:rgba(233,69,96,0.1); border:2px solid #e94560;
+            border-radius:12px; padding:20px; max-width:600px; text-align:left;
+        }
+        
+        .setup-box h3 { color:#e94560; margin-bottom:15px; font-size:1rem; }
+        .setup-box ol { color:#aaa; line-height:1.8; margin-left:20px; }
+        .setup-box li { margin-bottom:10px; }
+        .setup-box a { color:#4ecca3; text-decoration:none; font-weight:bold; }
+        .setup-box a:hover { text-decoration:underline; }
+        
+        .message { 
+            display:flex; gap:12px; margin-bottom:20px; animation:fadeIn 0.4s ease;
+        }
+        
+        @keyframes fadeIn { 
+            from { opacity:0; transform:translateY(10px); } 
+            to { opacity:1; transform:translateY(0); }
+        }
+        
+        .message.user { flex-direction:row-reverse; }
+        
+        .avatar {
+            width:40px; height:40px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            font-size:1.2rem; flex-shrink:0;
+        }
+        
+        .message.bot .avatar { 
+            background:linear-gradient(135deg,#e94560,#0f3460);
+            border:2px solid #e94560;
+        }
+        
+        .message.user .avatar { 
+            background:linear-gradient(135deg,#4ecca3,#0f3460);
+            border:2px solid #4ecca3;
+        }
+        
+        .msg-wrapper { max-width:75%; }
+        
+        .message-content {
+            padding:13px 17px; border-radius:18px; font-size:0.95rem;
+            line-height:1.7; word-wrap:break-word; white-space:pre-wrap;
+        }
+        
+        .message.bot .message-content { 
+            background:#16213e; border:1px solid rgba(233,69,96,0.2);
+            border-bottom-left-radius:4px;
+        }
+        
+        .message.user .message-content { 
+            background:#0f3460; border:1px solid rgba(78,204,163,0.2);
+            border-bottom-right-radius:4px;
+        }
+        
+        .message-time { font-size:0.7rem; color:#555; margin-top:4px; }
+        
+        .typing {
+            display:none; padding:5px 20px 10px;
+        }
+        
+        .typing-inner { display:flex; align-items:center; gap:12px; }
+        
+        .typing-avatar {
+            width:40px; height:40px; border-radius:50%;
+            background:linear-gradient(135deg,#e94560,#0f3460);
+            border:2px solid #e94560; display:flex;
+            align-items:center; justify-content:center; font-size:1.2rem;
+        }
+        
+        .typing-bubble {
+            background:#16213e; border:1px solid rgba(233,69,96,0.2);
+            padding:13px 18px; border-radius:18px; border-bottom-left-radius:4px;
+            display:flex; gap:5px;
+        }
+        
+        .typing-bubble span {
+            width:8px; height:8px; background:#e94560; border-radius:50%;
+            animation:bounce 1.2s infinite;
+        }
+        
+        .typing-bubble span:nth-child(2) { animation-delay:0.2s; }
+        .typing-bubble span:nth-child(3) { animation-delay:0.4s; }
+        
+        @keyframes bounce { 
+            0%,60%,100% { transform:translateY(0); }
+            30% { transform:translateY(-8px); }
+        }
+        
+        .input-area { 
+            padding:15px 20px; background:#16213e;
+            border-top:2px solid rgba(233,69,96,0.3);
+        }
+        
+        .input-wrapper {
+            display:flex; gap:10px; max-width:900px;
+            margin:0 auto; align-items:flex-end;
+        }
+        
+        textarea {
+            flex:1; padding:13px 18px; background:#1a1a2e;
+            color:#fff; border:2px solid #0f3460; border-radius:14px;
+            font-size:1rem; resize:none; outline:none; max-height:120px;
+            font-family:inherit; transition:border-color 0.3s; line-height:1.5;
+        }
+        
+        textarea:focus { border-color:#e94560; }
+        textarea::placeholder { color:#555; }
+        textarea:disabled { opacity:0.5; cursor:not-allowed; }
+        
+        .send-btn {
+            padding:13px 22px; background:linear-gradient(135deg,#e94560,#ff6b35);
+            border:none; color:white; border-radius:14px; cursor:pointer;
+            font-size:1.3rem; transition:all 0.3s;
+        }
+        
+        .send-btn:hover:not(:disabled) { 
+            transform:scale(1.1);
+            box-shadow:0 5px 20px rgba(233,69,96,0.4);
+        }
+        
+        .send-btn:disabled { opacity:0.5; cursor:not-allowed; }
+        
+        .hint { 
+            text-align:center; font-size:0.75rem;
+            color:#444; margin-top:8px;
+        }
+        
+        .error-box {
+            background:rgba(233,69,96,0.1); border:1px solid #e94560;
+            border-radius:10px; padding:12px 16px; color:#ff6b6b;
+            font-size:0.9rem; line-height:1.6;
+        }
+        
+        ::-webkit-scrollbar { width:5px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:#0f3460; border-radius:3px; }
+        
+        @media (max-width:600px) {
+            .setup-bar { flex-direction:column; }
+            .setup-bar input { min-width:100%; }
+            .msg-wrapper { max-width:88%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-left">
+        <h1>🤖 बिहारी AI Chatbot 🇮🇳</h1>
+        <p>Real AI • Powered by Replicate ⚡</p>
+    </div>
+    <div class="status-badge" id="statusBadge">🔴 Setup Required</div>
+</div>
+
+<div class="setup-bar">
+    <input 
+        type="password" 
+        id="apiKeyInput" 
+        placeholder="Paste your Replicate API token (r8_...)"
+    >
+    <button id="saveKeyBtn">💾 Save Key</button>
+    <span class="setup-status" id="setupStatus">Not connected</span>
+</div>
+
+<div class="chat-container" id="chatContainer">
+    <div class="welcome" id="welcomeScreen">
+        <div class="welcome-emoji">🙏</div>
+        <h2>स्वागत है! Welcome!</h2>
+        <div class="setup-box">
+            <h3>⚡ Get FREE Replicate API Key:</h3>
+            <ol>
+                <li>Go to <a href="https://replicate.com/" target="_blank">replicate.com</a></li>
+                <li>Sign up with Google (FREE!)</li>
+                <li>Go to <a href="https://replicate.com/account/api-tokens" target="_blank">API Tokens</a></li>
+                <li>Click "Create API Token"</li>
+                <li>Copy the token (starts with r8_)</li>
+                <li>Paste it above ⬆️</li>
+                <li>Click "Save Key"</li>
+                <li>Start chatting! 🚀</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<div class="typing" id="typingIndicator">
+    <div class="typing-inner">
+        <div class="typing-avatar">🤖</div>
+        <div class="typing-bubble">
+            <span></span><span></span><span></span>
+        </div>
+    </div>
+</div>
+
+<div class="input-area">
+    <div class="input-wrapper">
+        <textarea 
+            id="userInput" 
+            placeholder="भोजपुरी / हिंदी / अंग्रेजी में पूछें..." 
+            rows="1"
+            disabled
+        ></textarea>
+        <button class="send-btn" id="sendBtn" disabled>🚀</button>
+    </div>
+    <div class="hint">Enter = भेजें • Shift+Enter = नई लाइन</div>
+</div>
+
+<script>
+const API_URL = '/api/chat';
+let apiKey = localStorage.getItem('replicateApiKey') || null;
+let isLoading = false;
+
+const chatContainer = document.getElementById('chatContainer');
+const userInput = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+const typingIndicator = document.getElementById('typingIndicator');
+const apiKeyInput = document.getElementById('apiKeyInput');
+const saveKeyBtn = document.getElementById('saveKeyBtn');
+const statusBadge = document.getElementById('statusBadge');
+const setupStatus = document.getElementById('setupStatus');
+const welcomeScreen = document.getElementById('welcomeScreen');
+
+// Load saved key
+if (apiKey) {
+    apiKeyInput.value = apiKey;
+    enableChat();
+}
+
+function enableChat() {
+    statusBadge.textContent = '🟢 Ready!';
+    statusBadge.style.color = '#4ecca3';
+    statusBadge.style.borderColor = '#4ecca3';
+    setupStatus.textContent = '✅ Connected';
+    setupStatus.className = 'setup-status ready';
+    userInput.disabled = false;
+    sendBtn.disabled = false;
+    welcomeScreen.style.display = 'none';
+    userInput.focus();
+}
+
+function disableChat() {
+    statusBadge.textContent = '🔴 Setup Required';
+    statusBadge.style.color = '#e94560';
+    statusBadge.style.borderColor = '#e94560';
+    setupStatus.textContent = '❌ Not connected';
+    setupStatus.className = 'setup-status error';
+    userInput.disabled = true;
+    sendBtn.disabled = true;
+}
+
+saveKeyBtn.addEventListener('click', () => {
+    const key = apiKeyInput.value.trim();
+    
+    if (!key) {
+        setupStatus.textContent = '❌ Enter API key!';
+        setupStatus.className = 'setup-status error';
+        return;
+    }
+    
+    if (!key.startsWith('r8_')) {
+        setupStatus.textContent = '❌ Invalid key (must start with r8_)';
+        setupStatus.className = 'setup-status error';
+        return;
+    }
+    
+    apiKey = key;
+    localStorage.setItem('replicateApiKey', key);
+    enableChat();
+    setupStatus.textContent = '✅ Key saved!';
+});
+
+sendBtn.addEventListener('click', sendMessage);
+
+userInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+});
+
+userInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+
+window.addEventListener('load', () => {
+    if (apiKey) userInput.focus();
+});
+
+async function sendMessage() {
+    const message = userInput.value.trim();
+    if (!message || isLoading || !apiKey) return;
+
+    addMessage(message, 'user');
+    userInput.value = '';
+    userInput.style.height = 'auto';
+    isLoading = true;
+    sendBtn.disabled = true;
+    typingIndicator.style.display = 'block';
+    scrollToBottom();
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message, apiKey })
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Server error');
+        }
+
+        const data = await response.json();
+        typingIndicator.style.display = 'none';
+        addMessage(data.reply, 'bot');
+    } catch (error) {
+        typingIndicator.style.display = 'none';
+        addMessage(`❌ Error: ${error.message}\n\nकृपया फिर से कोशिश करें।\n(Please try again)`, 'bot');
+        console.error('Error:', error);
+    }
+
+    isLoading = false;
+    sendBtn.disabled = false;
+    scrollToBottom();
+}
+
+function addMessage(text, type) {
+    const div = document.createElement('div');
+    div.className = `message ${type}`;
+    const time = new Date().toLocaleTimeString('hi-IN', {hour:'2-digit', minute:'2-digit'});
+    div.innerHTML = `
+        <div class="avatar">${type === 'bot' ? '🤖' : '👤'}</div>
+        <div class="msg-wrapper">
+            <div class="message-content">${text}</div>
+            <div class="message-time">${time}</div>
+        </div>
+    `;
+    chatContainer.appendChild(div);
+    scrollToBottom();
+}
+
+function scrollToBottom() {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+</script>
+</body>
+</html>
